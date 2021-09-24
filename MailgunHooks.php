@@ -42,17 +42,21 @@ class MailgunHooks {
 		$subject,
 		$body
 	) {
+		$logger = \MediaWiki\Logger\LoggerFactory::getInstance( 'mailgun-ext' );
 		$conf = RequestContext::getMain()->getConfig();
-		$client = new \Http\Adapter\Guzzle6\Client();
+		$client = new \Http\Adapter\Guzzle7\Client();
 
 		$mailgunAPIKey = $conf->get( 'MailgunAPIKey' );
 		$mailgunDomain = $conf->get( 'MailgunDomain' );
 		if ( $mailgunAPIKey == "" || $mailgunDomain == "" ) {
 			throw new MWException( "Please update your LocalSettings.php with the correct Mailgun API configurations" );
 		}
+		if (strpos($from, '@') !== false) {
+			$from = "wiki@{$mailgunDomain}";
+		}
 
-		$mailgunTransport = new \Mailgun\Mailgun( $mailgunAPIKey, $client );
-		$message = $mailgunTransport->BatchMessage( $mailgunDomain );
+		$mailgunTransport = \Mailgun\Mailgun::create( $mailgunAPIKey );
+		$message = $mailgunTransport->messages()->getBatchMessage( $mailgunDomain );
 
 		$message->setFromAddress( $from );
 		$message->setSubject( $subject );
@@ -66,14 +70,16 @@ class MailgunHooks {
 			try {
 				$message->addToRecipient( $recip, [] );
 			} catch ( Exception $e ) {
-				return $e->getMessage();
+				$logger->debug($e->getMessage());
+				return true;
 			}
 		}
 
 		try {
 			$message->finalize();
 		} catch ( Exception $e ) {
-			return $e->getMessage();
+			$logger->debug($e->getMessage());
+			return true;
 		}
 
 		return false;

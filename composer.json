@@ -1,11 +1,8 @@
 {
 	"name": "mediawiki/mailgun",
 	"require": {
-		"mailgun/mailgun-php": "2.0",
-		"guzzlehttp/psr7": "~1.2",
-		"php-http/httplug": "^1.0",
-		"php-http/discovery": "^0.8",
-		"php-http/guzzle6-adapter": "^1.0"
+		"mailgun/mailgun-php": "3.5.1",
+		"php-http/guzzle7-adapter": "1.0.0"
 	},
 	"require-dev": {
 		"mediawiki/mediawiki-codesniffer": "35.0.0",
